@@ -1,0 +1,17 @@
+main.login-form
+  .container-min
+    .uk-card.uk-card-default
+      .uk-card-body
+        h1.uk-card-title = "Authorisation"
+        = form_with model: User, method: :post
+          .uk-margin
+            label.uk-form-label = "Username"
+            input.uk-input type="text" name="username" placeholder="Username"
+          .uk-margin
+            label.uk-form-label = "Password"
+            input.uk-input type="password" name="password" placeholder="Password"
+          input.uk-button.uk-button-primary type="submit" value="Log in"
+css:
+  .footer, .app-header{
+    display: none;
+  }

@@ -1,0 +1,30 @@
+div.messages-window style="padding: 0"
+  .container
+    = form_for user, html: {class: "uk-form-stacked"} do |f|
+      .uk-margin
+        .form-img--wrapper
+          img.form-img src=user.image.url
+          .form-img--control[uk-form-custom]
+            div uk-form-custom="target: true"
+              = f.file_field :image
+              input[class="uk-input uk-form-width-medium" type="text" placeholder="Select file" disabled]
+      .uk-margin
+        = f.label :username, class: "uk-form-label"
+        .uk-form-controls
+          = f.text_field :username, class: "uk-input"
+      = f.submit "Save", class: "uk-button uk-button-default"
+javascript:
+  function readURL(input) {
+      if (input.files && input.files[0]) {
+          let reader = new FileReader();
+          reader.onload = function (e) {
+              $('.form-img').attr('src', e.target.result);
+          }
+
+          reader.readAsDataURL(input.files[0]);
+      }
+  }
+
+  $("input[type=file]").change(function () {
+      readURL(this);
+  });

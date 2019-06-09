@@ -1,0 +1,67 @@
+div.messages-window
+  .container
+    ul#messages.messages
+      li.message-wrapper[v-for="(item, index) in messages"]
+        .message-outer[v-bind:class="(item.user_id == '#{user.id}')?'mine':''"]
+          span.message-username[v-if="(index != 0 && messages[index-1].user_id != item.user_id) || index == 0 "] = "{{ item.user.username }}"
+          .message.uk-animation-scale-up.uk-animation-fast = "{{ item.text }}"
+.control-panel
+  .container
+    form class="flex uk-flex" action=""
+      input#m.uk-input.control-field autocomplete="off" placeholder="Start typing..."
+      button.uk-button.uk-button-primary.control-button = "Send"
+
+css:
+  .footer {
+    display: none;
+  }
+javascript:
+  $(document).ready(function(){
+      let messages = new Vue({
+          el: '#messages',
+          data: {
+              messages: #{@messages}
+          }
+      });
+      let receiver = new Vue({
+          el: '.logo',
+          data: {
+              username: "#{@receiver.username}",
+              status: "offline"
+          }
+      });
+      $('form').submit(function (e) {
+          e.preventDefault();
+          socket.emit('chat message', {user_id: #{user.id}, pid: "#{params[:pid]}", text: $('#m').val()});
+          messages.messages.push({user_id: "#{user.id}", user: {username: "#{user.username}"}, pid: #{@receiver.id}, text: $('#m').val()});
+          setTimeout(scr, 100);
+          $('#m').val('');
+          return false;
+      });
+      window.scr = () => {
+        let $target = $('.messages-window')[0];
+        $target.scrollTop = $target.scrollHeight;
+        console.log('sdds')
+      }
+      window.socket.on('chat message', function (msg) {
+          if(#{params[:pid]} == msg.user_id){
+              messages.messages.push(msg);
+              setTimeout(scr, 100);
+          }
+      });
+      window.socket.on('user connected', function (text) {
+          if(text.username == "#{@receiver.username}")
+            receiver.status = "online";
+      });
+      window.socket.on('connected users', function(text){
+          window.connected = text;
+          window.connected.forEach(function (element) {
+              if (element == "#{@receiver.username}")
+                  receiver.status = "online";
+          });
+      });
+      window.socket.on('user disconnected', function (text) {
+          if(text.username == "#{@receiver.username}")
+            receiver.status = "offline";
+      });
+  })

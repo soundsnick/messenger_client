@@ -1,0 +1,56 @@
+doctype html
+html
+  head
+    title = "Messenger"
+    = csrf_meta_tags
+    = stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload'
+    = javascript_include_tag 'application', 'data-turbolinks-track': 'reload'
+  body
+    - if auth
+      javascript:
+        $(document).ready(function () {
+            window.socket = io('http://localhost:3001');
+            window.access_token = "#{session[:token]}";
+            socket.emit('auth', access_token);
+        });
+    - if notice
+      .uk-label-warning.notice
+        .container
+          = notice
+    main.app
+      header.app-header
+        .container style="display: flex; justify-content: space-between; align-items: center;"
+          - if params[:action] != "main"
+            .nav-button
+              a href=root_path
+                i.fa.fa-angle-left
+          h4.logo.uk-title style="margin: 0; flex: 1;"
+            - if params[:action] == "im"
+              = @receiver.username
+              .online = "{{ status }}"
+            - else
+              = "Chats"
+          .nav-button
+            a href=logout_path
+              = "Log out"
+              i.fa.fa-angle-right
+      .messages-window--wrapper
+        = yield
+      footer.footer
+        .container
+          .footer-button
+            a href=root_path
+              i.fa.fa-comment
+          .footer-button
+            a href=settings_path
+              i.fa.fa-cog
+          .footer-button
+            a href=logout_path
+              i.fa.fa-sign-out
+    javascript:
+      $(document).ready(function(){
+        window.socket.on('chat message', function (msg) {
+          if("#{params[:action]}" != "im")
+            UIkit.notification({message: `<a href="/im?pid=${msg.user_id}">${msg.user.username}: ${msg.text}</a>`, pos: 'bottom-left', status: 'primary', timeout: 5000})
+        });
+      })
